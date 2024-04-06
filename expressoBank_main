@@ -1,0 +1,126 @@
+limite_diario = 1000
+
+def main():
+    global saldo, extrato, qtd_saque, contas
+    saldo = 0  # Inicializando o saldo
+    extrato = ""  # Inicializando o extrato
+    qtd_saque = 0  # Inicializando a quantidade de saques
+    contas = {}
+    
+    while True:
+        tela_inicio()
+        passar_para_menu = input().lower()
+        usuario = None  # Definindo o usuário como None inicialmente
+
+        if passar_para_menu == "l":
+            usuario = login()
+        elif passar_para_menu == "d":
+            cadastro_conta()
+            usuario = login()
+
+        if usuario is not None:
+            while True:
+                menu(usuario)
+                option = input().lower()
+
+                if option == "d":
+                    deposito()
+                    voltar(usuario)
+                elif option == "s":
+                    saque()
+                    voltar(usuario)
+                elif option == "e":
+                    extrato_bancario()
+                    voltar(usuario)
+                elif option == "q":
+                    sair()
+
+def cadastro_conta():
+    global contas
+    while True:
+        nome_usuario = input("Digite o Nome do Usuário: ")
+        senha = input("Digite a senha: ")
+        conta_corrente = input("Digite o número da conta corrente: ")
+
+        if nome_usuario not in contas:
+            contas[nome_usuario] = {'senha': senha, 'conta_corrente': conta_corrente, 'saldo': 0, 'extrato': "", 'qtd_saque': 0}
+            print("Cadastro feito com sucesso!")
+            break
+        else:
+            print("Este nome de usuário já está em uso. Por favor, escolha outro.")
+
+def login():
+    global contas
+    usuario = input("Usuário: ")
+    senha = input("Senha: ")
+
+    if usuario in contas and contas[usuario]['senha'] == senha:
+        print("Login realizado com sucesso!")
+        return usuario
+    else:
+        print("Usuário ou senha inválidos.")
+        return None
+
+def deposito():
+    global saldo, extrato, qtd_saque, contas
+    dep = float(input("Digite o Valor do Depósito: "))
+    if dep > 0:
+        saldo += dep
+        extrato += f"Depósito: R$ {dep:.2f}\n"
+        print(f"Você Depositou: R$ {dep:.2f}\n")
+    else:
+        print("Operação Falhou! O valor informado é inválido.")
+
+def saque():
+    global saldo, extrato, qtd_saque, contas, limite_diario
+    if saldo <= 0:
+        print("Saldo insuficiente.")
+    else:
+        draw = float(input("Digite o Valor do Saque: "))
+        if draw <= 0:
+            print("Valor de saque inválido.")
+        elif draw > saldo:
+            print("Saldo insuficiente.")
+        elif draw > limite_diario:
+            print("Você atingiu o limite diário de saque.")
+        else:
+            saldo -= draw
+            extrato += f"Saque: R$ {draw:.2f}\n"
+            qtd_saque += 1
+            print(f"Você sacou R$: {draw:.2f}\n")
+
+def extrato_bancario():
+    global saldo, extrato, qtd_saque, contas
+    print("Extrato:")
+    print(extrato)
+    print(f"Saldo atual: R$: {saldo:.2f}\n")
+
+def sair():
+    print("Obrigado por usar nosso sistema bancário.")
+    exit()
+
+def tela_inicio():
+    print("=========================")
+    print("""Bem vindo ao Expresso Bank.
+[L] Login
+[D] Cadastro""")
+    print("=========================")
+
+def voltar(usuario):
+    menu_anterior = input("Você deseja voltar ao menu anterior? S/N")
+    if menu_anterior == "s":
+        menu(usuario)
+    elif menu_anterior == "n":
+        sair() 
+
+def menu(usuario):
+    print("=========================")
+    print(f"Bem vindo, {usuario}!\n")
+    print("Opções:")
+    print("[D] Depositar")
+    print("[S] Sacar")
+    print("[E] Extrato bancário")
+    print("[Q] Sair\n")
+    print("=========================")
+
+main()
